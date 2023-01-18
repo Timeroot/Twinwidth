@@ -25,6 +25,9 @@ public class MainP23 {
 			if(VERB) System.out.println("TW = "+res);
 			
 		} else if(TO_RUN.endsWith("/")) {
+			int[] answers = new int[] {1, 2, 0, 0, 2, 3, 3, 0, 2, 2, 4, 1, 2};
+			int ansI = 0;
+			
 			File dir = new File(TO_RUN);
 			PrintStream fileout = new PrintStream(System.out);
 			File[] fileList = dir.listFiles();
@@ -36,6 +39,10 @@ public class MainP23 {
 					Graph g = parse(reader);
 					int res = solve(g, fileout);
 					if(VERB) System.out.println("TW = "+res);
+					if(res != answers[ansI]) {
+						throw new RuntimeException("Expected "+answers[ansI]);
+					}
+					ansI++;
 				}
 			}
 		} else if(TO_RUN.equals("unit")) {
@@ -46,8 +53,12 @@ public class MainP23 {
 	}
 	
 	public static int solve(Graph g, PrintStream fileout) {
+		long startT;
+		if(VERB) startT = System.currentTimeMillis();
+		
 		int res = BruteTW.twinWidth(g);
 		int[] sol = BruteTW.bestSol;
+		System.out.println(Arrays.toString(sol));
 		int N = g.N;
 		
 		int steps = 0;
@@ -68,6 +79,11 @@ public class MainP23 {
 		for(int i=1; i<N; i++) {
 			if(!gone[i])
 				fileout.println(1+" "+(i+1));
+		}
+		
+		if(VERB) {
+			float t = (System.currentTimeMillis()-startT) * 0.001f;
+			System.out.println("Took "+t+"s");
 		}
 		return res;
 	}

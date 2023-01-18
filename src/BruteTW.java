@@ -19,6 +19,60 @@ public class BruteTW {
 	}
 
 	private static int twinWidth(Trigraph tg, int lb, int ub) {
+		//Look for reductions
+		//Take a note of how much we increase 'depth' by here, so we can undo later
+		int reduce_depth = 0;
+		{
+			//Edge density very high? Take the complement
+			int N = tg.N;
+			int eBlk = tg.EBlk();
+			int eRed = tg.ERed();
+			int eMax = N*(N-1)/2;
+			if(eBlk > eMax - eRed) {
+				//Take the complement
+				tg.complement();
+			}
+			
+			//Look for twin vertices
+			passLoop: while(true) {//loop as long as we merged something this pass
+				boolean progress = false;
+				iLoop: for(int i=0; i<N; i++) {
+					int idB = tg.degBlk[i];
+					int idR = tg.degRed[i];
+					if(idB + idR == 0) //empty vertex
+						continue iLoop;
+					
+					jLoop: for(int j=i+1; j<N; j++) {
+						int jdB = tg.degBlk[j];
+						int jdR = tg.degRed[j];
+						if((jdB + jdR == 0) || (idB != jdB) || (idR != jdR)) //degrees don't match
+							continue jLoop;
+						
+						for(Integer inB : tg.eBlk[i]) {
+							if(!tg.eBlk[j].contains(inB))
+								continue jLoop;
+						}
+						for(Integer inR : tg.eRed[i]) {
+							if(!tg.eRed[j].contains(inR))
+								continue jLoop;
+						}
+						
+						//they're twins! merge
+						//tg.mergeRed(i, j);
+						//can bypass that and just delete j.
+						tg.clearVertex(j);
+						progress = true;
+						currSol[2*depth] = i;
+						currSol[2*depth+1] = j;
+						depth++;
+						reduce_depth++;
+					}
+				}
+				if(!progress)
+					break passLoop;
+			}
+		}
+		
 		if(tg.E() == 0) {
 			//We completed and weren't pruned -- so this must be a new record!
 			println(2, "Success here ("+lb+","+ub+")");
@@ -73,6 +127,12 @@ public class BruteTW {
 		
 		currSol[2*depth] = -1;
 		currSol[2*depth+1] = -1;
+		
+		for( ; reduce_depth > 0; reduce_depth--) {
+			depth--;
+			currSol[2*depth] = -1;
+			currSol[2*depth+1] = -1;
+		}
 		
 		println(4, "Ret");
 		return bestScore;

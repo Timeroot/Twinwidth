@@ -315,4 +315,27 @@ public class Trigraph {
 	void dump() {
 		System.out.println(dumpS());
 	}
+
+	//Changes the graph to its complement (blk <-> blank, red stays the same)
+	public void complement() {
+		for(int i=0; i<N; i++) {
+			for(int j=i+1; j<N; j++) {
+				if(eRed[i].contains(j)) {
+					//red, stays the same
+				} else if(eBlk[i].contains(j)) {
+					//blk -> nothing
+					eBlk[i].remove(j);
+					eBlk[j].remove(i);
+				} else {
+					//nothing -> blk
+					eBlk[i].add(j);
+					eBlk[j].add(i);
+				}
+			}
+		}
+		//fix degree info
+		for(int i=0; i<N; i++) {
+			degBlk[i] = N-1 - degRed[i] - degBlk[i];
+		}
+	}
 }
