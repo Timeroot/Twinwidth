@@ -58,7 +58,6 @@ public class MainP23 {
 		
 		int res = BruteTW.twinWidth(g);
 		int[] sol = BruteTW.bestSol;
-		System.out.println(Arrays.toString(sol));
 		int N = g.N;
 		
 		int steps = 0;
