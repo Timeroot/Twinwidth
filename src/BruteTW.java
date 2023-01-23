@@ -1,6 +1,7 @@
-import java.util.Arrays;
+import java.util.*;
 
 public class BruteTW {
+	private static final int VERBOSE = 1;
 
 	static int[] bestSol;
 	static int[] currSol;
@@ -11,81 +12,58 @@ public class BruteTW {
 		depth = 0;
 		currSol = new int[2*(N-1)];
 		
-		int res = twinWidth(Trigraph.fromBigraph(g), 0, 1+g.N);
+		//do initial twin checks
+		int reduce_depth = checkTwinsBigraph(g);
+		int res;
+		
+		if(g.E() == 0) {
+			res = 0;
+			bestSol = currSol.clone();
+			println(1, "Twin reduction solved it, the end");
+		} else {
+			res = twinWidth(Trigraph.fromBigraph(g), 0, 1+g.N);
+		}
+		
 		println(1, "Scored "+res);
-		println(1, Arrays.toString(bestSol));
+		println(2, Arrays.toString(bestSol));
+
+		depth -= reduce_depth;
+		if(depth != 0)
+			throw new RuntimeException("Depth tracking failed, "+depth);
 		
 		return res;
 	}
 
 	private static int twinWidth(Trigraph tg, int lb, int ub) {
 		//Look for reductions
-		//Take a note of how much we increase 'depth' by here, so we can undo later
-		int reduce_depth = 0;
-		{
-			//Edge density very high? Take the complement
-			int N = tg.N;
-			int eBlk = tg.EBlk();
-			int eRed = tg.ERed();
-			int eMax = N*(N-1)/2;
-			if(eBlk > eMax - eRed) {
-				//Take the complement
-				tg.complement();
-			}
-			
-			//Look for twin vertices
-			passLoop: while(true) {//loop as long as we merged something this pass
-				boolean progress = false;
-				iLoop: for(int i=0; i<N; i++) {
-					int idB = tg.degBlk[i];
-					int idR = tg.degRed[i];
-					if(idB + idR == 0) //empty vertex
-						continue iLoop;
-					
-					jLoop: for(int j=i+1; j<N; j++) {
-						int jdB = tg.degBlk[j];
-						int jdR = tg.degRed[j];
-						if((jdB + jdR == 0) || (idB != jdB) || (idR != jdR)) //degrees don't match
-							continue jLoop;
-						
-						for(Integer inB : tg.eBlk[i]) {
-							if(!tg.eBlk[j].contains(inB))
-								continue jLoop;
-						}
-						for(Integer inR : tg.eRed[i]) {
-							if(!tg.eRed[j].contains(inR))
-								continue jLoop;
-						}
-						
-						//they're twins! merge
-						//tg.mergeRed(i, j);
-						//can bypass that and just delete j.
-						tg.clearVertex(j);
-						progress = true;
-						currSol[2*depth] = i;
-						currSol[2*depth+1] = j;
-						depth++;
-						reduce_depth++;
-					}
-				}
-				if(!progress)
-					break passLoop;
-			}
+		
+		//Edge density very high? Take the complement
+		int N = tg.N;
+		int eBlk = tg.EBlk();
+		int eRed = tg.ERed();
+		int eMax = N*(N-1)/2;
+		if(eBlk > eMax - eRed) {
+			//Take the complement
+			tg.complement();
 		}
+
+		//Take a note of how much we increase 'depth' by here, so we can undo later
+		int reduce_depth = checkTwinsTrigraph(tg);
 		
 		if(tg.E() == 0) {
 			//We completed and weren't pruned -- so this must be a new record!
 			println(2, "Success here ("+lb+","+ub+")");
 			bestSol = currSol.clone();
+			cleanDepth(reduce_depth);
 			return 0;			
 		}
 		
 		if(lb > ub) {
+			cleanDepth(reduce_depth);
 			return ub+1;
 		}
 		
 		int bestScore = ub+1;
-		int N = tg.N;
 		iLoop: for(int i=0; i<N; i++) {
 			//only merge nonempty vertices
 			if(tg.degBlk[i] == 0 && tg.degRed[i] == 0)
@@ -101,7 +79,7 @@ public class BruteTW {
 					continue;
 				currSol[2*depth] = i;
 				currSol[2*depth+1] = j;
-				
+
 				depth++;
 				println(4, "Rec");
 				int lb_ij = Math.max(lb, red_ij_0);
@@ -128,17 +106,103 @@ public class BruteTW {
 		currSol[2*depth] = -1;
 		currSol[2*depth+1] = -1;
 		
-		for( ; reduce_depth > 0; reduce_depth--) {
-			depth--;
-			currSol[2*depth] = -1;
-			currSol[2*depth+1] = -1;
-		}
+		cleanDepth(reduce_depth);
 		
 		println(4, "Ret");
 		return bestScore;
 	}
 	
-	private static final int VERBOSE = 0;
+	private static int checkTwinsBigraph(Graph g) {
+		int N = g.N;
+		int reduce_depth = 0;
+		//Look for twin vertices
+		passLoop: while(true) {//loop as long as we merged something this pass
+			boolean progress = false;
+			iLoop: for(int i=0; i<N; i++) {
+				int id = g.deg[i];
+				if(id == 0) //empty vertex
+					continue iLoop;
+				
+				jLoop: for(int j=i+1; j<N; j++) {
+					int jd = g.deg[j];
+					if(id != jd) //degrees don't match
+						continue jLoop;
+					
+					for(Integer in : g.eList[i]) {
+						if(!g.eList[j].contains(in) && in != j)
+							continue jLoop;
+					}
+					
+					//they're twins! merge
+					//tg.mergeRed(i, j);
+					//can bypass that and just delete j.
+					g.clearVertex(j);
+					progress = true;
+					currSol[2*depth] = i;
+					currSol[2*depth+1] = j;
+					depth++;
+					reduce_depth++;
+				}
+			}
+			if(!progress)
+				break passLoop;
+		}
+		return reduce_depth;
+	}
+	
+	private static int checkTwinsTrigraph(Trigraph tg) {
+		int N = tg.N;
+		int reduce_depth = 0;
+		//Look for twin vertices
+		passLoop: while(true) {//loop as long as we merged something this pass
+			boolean progress = false;
+			iLoop: for(int i=0; i<N; i++) {
+				int idB = tg.degBlk[i];
+				int idR = tg.degRed[i];
+				if(idB + idR == 0) //empty vertex
+					continue iLoop;
+				
+				jLoop: for(int j=i+1; j<N; j++) {
+					int jdB = tg.degBlk[j];
+					int jdR = tg.degRed[j];
+					if((jdB + jdR == 0) || (idB != jdB) || (idR != jdR)) //degrees don't match
+						continue jLoop;
+					
+					for(Integer inB : tg.eBlk[i]) {
+						if(!tg.eBlk[j].contains(inB) && inB != j)
+							continue jLoop;
+					}
+					for(Integer inR : tg.eRed[i]) {
+						if(!tg.eRed[j].contains(inR) && inR != j)
+							continue jLoop;
+					}
+					
+					//they're twins! merge
+					//tg.mergeRed(i, j);
+					//can bypass that and just delete j.
+					tg.clearVertex(j);
+					progress = true;
+					currSol[2*depth] = i;
+					currSol[2*depth+1] = j;
+					depth++;
+					reduce_depth++;
+				}
+			}
+			if(!progress)
+				break passLoop;
+		}
+		return reduce_depth;
+	}
+	
+	private static void cleanDepth(int reduce_depth) {
+		for( ; reduce_depth > 0; reduce_depth--) {
+			System.out.println("E");
+			depth--;
+			currSol[2*depth] = -1;
+			currSol[2*depth+1] = -1;
+		}
+	}
+
 	private static final void println(int verblvl, String s) {
 		if(VERBOSE >= verblvl)
 			System.out.println(s);

@@ -9,12 +9,12 @@ import java.util.Arrays;
 public class MainP23 {
 	
 	static final String TO_RUN = 
-//			"tiny-test/"
-			"stdin"
+			"tiny-test/"
+//			"stdin"
 //			"unit"
 			;
 	
-	static final boolean VERB = false;
+	static final boolean VERB = true;
 	
 	public static void main(String[] args) throws IOException {
 		if(TO_RUN.equals("stdin")) {

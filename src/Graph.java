@@ -1,5 +1,8 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Queue;
 
 public class Graph {
 	int N;
@@ -160,5 +163,56 @@ public class Graph {
 
 	void dump() {
 		System.out.println(dumpS());
+	}
+
+	//Changes the graph to its complement
+	public void complement() {
+		for(int i=0; i<N; i++) {
+			for(int j=i+1; j<N; j++) {
+				if(eList[i].contains(j)) {
+					//blk -> nothing
+					eList[i].remove(j);
+					eList[j].remove(i);
+				} else {
+					//nothing -> blk
+					eList[i].add(j);
+					eList[j].add(i);
+				}
+			}
+		}
+		//fix degree info
+		for(int i=0; i<N; i++) {
+			deg[i] = N-1 - deg[i];
+		}
+	}
+	
+	//Check for connected components.
+	public ArrayList<ArrayList<Integer>> connComps(){
+		ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+		boolean[] visited = new boolean[N];
+		Queue<Integer> toVisit = new ArrayDeque<Integer>();
+		for(int i=0; i<N; i++) {
+			if(visited[i])
+				continue;
+			toVisit.add(i);
+			ArrayList<Integer> comp = new ArrayList<>();
+			res.add(comp);
+			
+			do {
+				int v = toVisit.poll();
+				if(visited[v])
+					continue;
+				
+				visited[v] = true;
+				comp.add(v);
+				
+				for(int v2 : eList[v]) {
+					if(!visited[v2])
+						toVisit.add(v2);
+				}
+				
+			} while(!toVisit.isEmpty());
+		}
+		return res;
 	}
 }
