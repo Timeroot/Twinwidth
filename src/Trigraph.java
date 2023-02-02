@@ -1,25 +1,27 @@
 import java.util.*;
 
+import sets.SmallIntSet;
+
 public class Trigraph {
 	int N;
-	HashSet<Integer>[] eBlk;
-	HashSet<Integer>[] eRed;
+	Set<Integer>[] eBlk;
+	Set<Integer>[] eRed;
 	int[] degBlk, degRed;
 	int maxRed;
 
-	static final boolean CHECK = false;
+	static final boolean CHECK = true;
 	
-	public Trigraph(int N_, HashSet<Integer>[] eBlk_, HashSet<Integer>[] eRed_,
+	public Trigraph(int N_, Set<Integer>[] newBlk, Set<Integer>[] newRed,
 			int[] degBlk_, int[] degRed_, int maxRed_) {
 		N = N_;
-		eBlk = eBlk_;
-		eRed = eRed_;
+		eBlk = newBlk;
+		eRed = newRed;
 		degBlk = degBlk_;
 		degRed = degRed_;
 		maxRed = maxRed_;
 	}
 
-	public Trigraph(int N_, HashSet<Integer>[] eBlk_, HashSet<Integer>[] eRed_) {
+	public Trigraph(int N_, Set<Integer>[] eBlk_, Set<Integer>[] eRed_) {
 		N = N_;
 		eBlk = eBlk_;
 		eRed = eRed_;
@@ -34,12 +36,12 @@ public class Trigraph {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	static Trigraph fromBigraph(Graph g){
 		int N = g.N;
-		HashSet<Integer>[] eRed = new HashSet[N];
+		@SuppressWarnings("unchecked")
+		Set<Integer>[] eRed = new Set[N];
 		for(int i=0; i<N; i++) {
-			eRed[i] = (HashSet<Integer>) new HashSet<Integer>();
+			eRed[i] = emptyT(N);
 		}
 		return new Trigraph(N, cloneList(g.eList), eRed,
 				Arrays.copyOf(g.deg,N), new int[N], 0);
@@ -133,20 +135,45 @@ public class Trigraph {
 				maxRed = degRed[v2];
 		}
 	}
+	
+//	@SuppressWarnings("unchecked")
+	private static Set<Integer> cloneT(Set<Integer> set){
+//		if(set instanceof HashSet) {
+//			return (Set<Integer>) ((HashSet<Integer>)set).clone();
+//		} else {
+//			HashSet<Integer> res = new HashSet<Integer>();
+//			res.addAll(set);
+//			return res;
+//		}
+		
+		if(set instanceof HashSet) {
+//			int max = set.stream().max(Integer::compare).get();
+			SmallIntSet res = new SmallIntSet(0);//max
+			res.addAll(set);
+			return res;
+		} else {
+			return (Set<Integer>) ((SmallIntSet)set).clone();
+		}
+	}
 
-	@SuppressWarnings("unchecked")
-	private static HashSet<Integer>[] cloneList(HashSet<Integer>[] arr){
+	private static Set<Integer> emptyT(int N){
+//		return new HashSet<Integer>();
+		return new SmallIntSet(N);
+	}
+
+	private static Set<Integer>[] cloneList(Set<Integer>[] arr){
 		int N = arr.length;
-		HashSet<Integer>[] newArr = new HashSet[N];
+		@SuppressWarnings("unchecked")
+		Set<Integer>[] newArr = new Set[N];
 		for(int i=0; i<N; i++) {
-			newArr[i] = (HashSet<Integer>) arr[i].clone();
+			newArr[i] = cloneT(arr[i]);
 		}
 		return newArr;
 	}
 	
 	Trigraph copy() {
-		HashSet<Integer>[] newBlk = cloneList(eBlk);
-		HashSet<Integer>[] newRed = cloneList(eRed);
+		Set<Integer>[] newBlk = cloneList(eBlk);
+		Set<Integer>[] newRed = cloneList(eRed);
 		return new Trigraph(N, newBlk, newRed, Arrays.copyOf(degBlk,N), Arrays.copyOf(degRed,N), maxRed);
 	}
 	
@@ -198,8 +225,8 @@ public class Trigraph {
 		eBlk = Arrays.copyOf(eBlk, Nnew);
 		eRed = Arrays.copyOf(eRed, Nnew);
 		for(int i=N; i<Nnew; i++) {
-			eBlk[i] = new HashSet<>();
-			eRed[i] = new HashSet<>();
+			eBlk[i] = emptyT(Nnew);
+			eRed[i] = emptyT(Nnew);
 		}
 		N += vNew;
 	}
@@ -221,20 +248,18 @@ public class Trigraph {
 		}
 		
 		//Step 2: Construct v1 neighborhood
-		@SuppressWarnings("unchecked")
-		HashSet<Integer> N2mN1 = (HashSet<Integer>)eBlk[v2].clone();
+		Set<Integer> N2mN1 = cloneT(eBlk[v2]);
 		N2mN1.removeAll(eBlk[v1]);
 
-		@SuppressWarnings("unchecked")
-		HashSet<Integer> N1mN2 = (HashSet<Integer>)eBlk[v1].clone();
+		Set<Integer> N1mN2 = cloneT(eBlk[v1]);
 		N1mN2.removeAll(eBlk[v2]);
 		
-		HashSet<Integer> newRed = eRed[v1];
+		Set<Integer> newRed = eRed[v1];
 		newRed.addAll(eRed[v2]);
 		newRed.addAll(N2mN1);
 		newRed.addAll(N1mN2);
 
-		HashSet<Integer> newBlk = eBlk[v1];
+		Set<Integer> newBlk = eBlk[v1];
 		newBlk.addAll(eBlk[v2]);
 		newBlk.removeAll(newRed);
 		

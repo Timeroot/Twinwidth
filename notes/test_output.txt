@@ -1,0 +1,62 @@
+From BruteTW, Feb 1st:
+
+Reading exact-public/exact_002.gr
+Took 0.015000001s
+TW = 6
+Reading exact-public/exact_004.gr
+Took 0.87900007s
+TW = 7
+Reading exact-public/exact_006.gr
+Took 4.136s
+TW = 7
+Reading exact-public/exact_008.gr
+Took 0.0050000004s
+TW = 10
+Reading exact-public/exact_010.gr
+Took 20.546001s
+TW = 6
+Reading exact-public/exact_012.gr
+Took 15.915001s
+TW = 8
+Reading exact-public/exact_014.gr
+Took 11.117001s
+TW = 8
+Reading exact-public/exact_016.gr
+Took 41.399002s
+TW = 8
+Reading exact-public/exact_018.gr
+Took 8.279s
+TW = 3
+Reading exact-public/exact_020.gr
+Took 230.533s
+TW = 5
+Reading exact-public/exact_022.gr
+
+<terminated after two hours>
+
+
+From SimpleTW, Feb 2nd:
+
+Reading exact-public/exact_002.gr
+Scored 6
+Took 0.028s
+TW = 6
+
+Reading exact-public/exact_004.gr
+Scored 7
+Took 20.779001s
+TW = 7
+
+Reading exact-public/exact_006.gr
+Scored 7
+Took 297.86603s
+TW = 7
+
+Reading exact-public/exact_008.gr
+Scored 10
+Took 0.021000002s
+TW = 10
+
+Reading exact-public/exact_010.gr
+
+<terminated after an hour>

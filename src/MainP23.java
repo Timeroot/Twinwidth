@@ -3,18 +3,21 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 
 public class MainP23 {
 	
 	static final String TO_RUN = 
-			"tiny-test/"
+//			"tiny-test/"
+			"exact-public/"
 //			"stdin"
 //			"unit"
 			;
 	
 	static final boolean VERB = true;
+	static final boolean PRINT_SOL_TESTING = false;
 	
 	public static void main(String[] args) throws IOException {
 		if(TO_RUN.equals("stdin")) {
@@ -25,11 +28,14 @@ public class MainP23 {
 			if(VERB) System.out.println("TW = "+res);
 			
 		} else if(TO_RUN.endsWith("/")) {
-			int[] answers = new int[] {1, 2, 0, 0, 2, 3, 3, 0, 2, 2, 4, 1, 2};
+			int[] answers_tiny = new int[] {1, 2, 0, 0, 2, 3, 3, 0, 2, 2, 4, 1, 2};
 			int ansI = 0;
 			
 			File dir = new File(TO_RUN);
 			PrintStream fileout = new PrintStream(System.out);
+			if(!PRINT_SOL_TESTING) {
+				fileout = new PrintStream(OutputStream.nullOutputStream());
+			}
 			File[] fileList = dir.listFiles();
 			Arrays.sort(fileList);
 			for(File f : fileList) {
@@ -37,12 +43,14 @@ public class MainP23 {
 					System.out.println("Reading "+f);
 					BufferedReader reader = new BufferedReader(new FileReader(f));
 					Graph g = parse(reader);
+//					g.dumpMMA();
 					int res = solve(g, fileout);
 					if(VERB) System.out.println("TW = "+res);
-					if(res != answers[ansI]) {
-						throw new RuntimeException("Expected "+answers[ansI]);
+					if(TO_RUN.equals("tiny-test") && res != answers_tiny[ansI]) {
+						throw new RuntimeException("Expected "+answers_tiny[ansI]);
 					}
 					ansI++;
+					System.out.println();
 				}
 			}
 		} else if(TO_RUN.equals("unit")) {
@@ -56,28 +64,12 @@ public class MainP23 {
 		long startT;
 		if(VERB) startT = System.currentTimeMillis();
 		
-		int res = BruteTW.twinWidth(g);
-		int[] sol = BruteTW.bestSol;
+		int res = SimpleTW.twinWidth(g);
+		int[] sol = SimpleTW.bestSol;
 		int N = g.N;
 		
-		int steps = 0;
-		boolean[] gone = new boolean[N];
 		for(int i=0; i<N-1; i++) {
-			if(sol[2*i] == sol[2*i+1]) {
-				break;
-			}
-			steps++;
-			gone[sol[2*i+1]] = true;
-			sol[2*i]++;
-			sol[2*i+1]++;
-		}
-		for(int i=0; i<steps; i++) {
-			fileout.println(sol[2*i]+" "+sol[2*i+1]);
-		}
-		//Need to end the printing with deg-zero contractions
-		for(int i=1; i<N; i++) {
-			if(!gone[i])
-				fileout.println(1+" "+(i+1));
+			fileout.println((1+sol[2*i])+" "+(1+sol[2*i+1]));
 		}
 		
 		if(VERB) {
@@ -89,7 +81,7 @@ public class MainP23 {
 	
 	public static void unitTests() {
 		Testing.testGraphOps();
-		System.out.println("Passed GraphOps");
+		System.out.println("Passed testGraphOps");
 		Testing.testPath();
 		System.out.println("Passed testPath");
 		Testing.testCograph();

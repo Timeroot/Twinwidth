@@ -1,0 +1,30 @@
+merge A and B
+
+they get red edge to X and Y
+
+merge C and D
+
+they get red edge to X and Z
+
+can freely re-order them? because the only 'difference' would be if the max red-degree at
+X was higher in the middle. could happenif A and B both had red edges to Z. So we bring Z
+down by one and then C and D increase it again. In another order, Z would have been +1.
+
+This is the only thing that can happen really -- C and D increase the red degree of something,
+and then merging A and B would decrease it again. This can be a neighbor of (one of) C and D,
+or C/D themself, if they're a red neighbor of (A,B)
+
+Can skip if:
+  -(A,B) and (C,D) are all different
+  -(C,D) comes before (A,B) lexicographically i.e. C < A
+  -the merged CD is not a red neighbor of AB, the red degree of CD is less than (current lb-1)
+ and
+  -the merged CD has no red neighbor that is also a red neighbor of AB (first case)
+
+merge A and B
+merge A and C
+
+can swap as long as neither:
+  -C shares a high-red-degree vertices with AB
+ nor
+  -the AC vertex has a critically high red-degree (higher than ABC) -- which is at most 1 less than ABC

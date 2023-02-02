@@ -9,7 +9,7 @@ public class Graph {
 	HashSet<Integer>[] eList;
 	int[] deg;
 	
-	static final boolean CHECK = true;
+	static final boolean CHECK = false;
 	
 	public Graph(int N_, HashSet<Integer>[] eList_,
 			int[] deg_) {
@@ -163,6 +163,37 @@ public class Graph {
 
 	void dump() {
 		System.out.println(dumpS());
+	}
+	
+	void dumpMMA() {
+		System.out.println("Graph[Union[Sort /@ Flatten@");
+		String res = "";
+		res += "{";
+		boolean firstRow = true;
+		for(int i=0; i<N; i++) {
+
+			String rowStr = "";
+			boolean first = true;
+			for(int vo : eList[i]) {
+				if(!first)
+					rowStr += ", ";
+				rowStr += "UndirectedEdge["+(1+i)+","+(1+vo)+"]";
+				first = false;
+			}
+			
+			if(rowStr.length() == 0)
+				continue;
+			
+			if(!firstRow) {
+				res += ",";
+			} else {
+				firstRow = false;
+			}
+			res += "{"+rowStr+"}\n";
+		}
+		res += "}\n";
+		System.out.println(res);
+		System.out.println("], VertexLabels -> Automatic, GraphLayout -> Automatic]");
 	}
 
 	//Changes the graph to its complement
