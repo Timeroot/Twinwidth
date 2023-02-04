@@ -49,44 +49,9 @@ public class HeurGreedy {
 					break;//done early
 			}
 			
-			int bestI=-1, bestJ=-1;
-			int bestDRed = N+1;
-			int bestERed = N*N;
-			int bestEBlk = N*N;
+			IJChoice heurSel = highRedHeur(tg);
 			
-			iLoop: for(int i=0; i<N; i++) {
-				//only merge nonempty vertices
-				if(tg.degBlk[i] == 0 && tg.degRed[i] == 0)
-					continue iLoop;
-				
-				jLoop: for(int j=i+1; j<N; j++) {
-					if(tg.degBlk[j] == 0 && tg.degRed[j] == 0)
-						continue jLoop;
-					
-					Trigraph tg_ij = tg.copy();
-					int ij_dRed = tg_ij.mergeRed(i, j);
-					int ij_eRed = tg_ij.ERed();
-					int ij_eBlk = tg_ij.EBlk();
-					
-					if(ij_dRed > bestDRed)
-						continue jLoop;
-					if(ij_dRed == bestDRed) {
-						if(ij_eRed > bestERed)
-							continue jLoop;
-						if(ij_eRed == bestERed) {
-							if(ij_eBlk >= bestEBlk)
-								continue jLoop;
-						}
-					}
-					//new best
-					bestI = i; bestJ = j;
-					bestDRed = ij_dRed;
-					bestERed = ij_eRed;
-					bestEBlk = ij_eBlk;
-				}
-			}
-			
-			int i = bestI, j = bestJ;
+			int i = heurSel.i, j = heurSel.j;
 			
 			currSol[2*depth] = i;
 			currSol[2*depth+1] = j;
@@ -197,5 +162,103 @@ public class HeurGreedy {
 	private static final void println(int verblvl, String s) {
 		if(VERBOSE >= verblvl)
 			System.out.println(s);
+	}
+	
+	//represents on selection of which (i,j) to merge according to a heuristic
+	static final class IJChoice {
+		final int i, j;
+		IJChoice(int i_, int j_){
+			i = i_; j = j_;
+		}
+	}
+
+	//picks two vertices that are close and small degree if possible
+	public static IJChoice fastHeur(Trigraph tg) {
+		int N = tg.N;
+		int bestI=-1, bestJ=-1;
+		int minDegI = 100*N;
+		
+		iLoop: for(int i=0; i<N; i++) {
+			//only merge nonempty vertices
+			if(tg.degBlk[i] == 0 && tg.degRed[i] == 0)
+				continue iLoop;
+			
+			int effDegI = tg.degBlk[i] + 2*tg.degRed[i];
+			if(effDegI >= minDegI) {
+				continue iLoop;
+			} else {
+				minDegI = effDegI;
+				bestI = i;
+				bestJ = -1;
+			}
+			
+			if(tg.degRed[i] > 0) {
+				int minDegJ = 100*N;
+				jLoop: for(int j : tg.eRed[i]) {
+					int effDegJ = tg.degBlk[j] + 2*tg.degRed[j];
+					if(effDegJ >= minDegJ) {
+						continue jLoop;
+					} else {
+						minDegJ = effDegJ;
+						bestJ = j;
+					}
+				}
+			} else {
+				int minDegJ = 100*N;
+				jLoop: for(int j : tg.eBlk[i]) {
+					int effDegJ = tg.degBlk[j] + 2*tg.degRed[j];
+					if(effDegJ >= minDegJ) {
+						continue jLoop;
+					} else {
+						minDegJ = effDegJ;
+						bestJ = j;
+					}
+				}
+			}
+		}
+		
+		return new IJChoice(bestI, bestJ);
+	}
+	
+	public static IJChoice highRedHeur(Trigraph tg) {
+		int N = tg.N;
+		int bestI=-1, bestJ=-1;
+		int bestDRed = N+1;
+		int bestERed = N*N;
+		int bestEBlk = N*N;
+		
+		iLoop: for(int i=0; i<N; i++) {
+			//only merge nonempty vertices
+			if(tg.degBlk[i] == 0 && tg.degRed[i] == 0)
+				continue iLoop;
+			
+			jLoop: for(int j=i+1; j<N; j++) {
+				if(tg.degBlk[j] == 0 && tg.degRed[j] == 0)
+					continue jLoop;
+				
+				Trigraph tg_ij = tg.copy();
+				int ij_dRed = tg_ij.mergeRed(i, j);
+				int ij_eRed = tg_ij.ERed();
+				int ij_eBlk = tg_ij.EBlk();
+				
+				if(ij_dRed > bestDRed)
+					continue jLoop;
+				if(ij_dRed == bestDRed) {
+					if(ij_eRed > bestERed)
+						continue jLoop;
+					if(ij_eRed == bestERed) {
+						if(ij_eBlk >= bestEBlk)
+							continue jLoop;
+					}
+				}
+				//new best
+				bestI = i; bestJ = j;
+				bestDRed = ij_dRed;
+				bestERed = ij_eRed;
+				bestEBlk = ij_eBlk;
+			}
+		}
+		
+		return new IJChoice(bestI, bestJ);
 	}
 }

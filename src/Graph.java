@@ -195,6 +195,52 @@ public class Graph {
 		System.out.println(res);
 		System.out.println("], VertexLabels -> Automatic, GraphLayout -> Automatic]");
 	}
+	
+	//Helper method for using subgraph below.
+	public int[] revMap(ArrayList<Integer> vs) {
+		int N2 = vs.size();
+		//Build reverse index. 
+		int[] revMap = new int[N];
+		for(int i=0; i<N; i++) {
+			revMap[i] = -1;
+		}
+		for(int i=0; i<N2; i++) {
+			revMap[vs.get(i)] = i;
+		}
+		return revMap;		
+	}
+	
+	//Get the induced subgraph on the specified set of vertices
+	public Graph subgraph(ArrayList<Integer> vs) {
+		//Size of reduced graph
+		int N2 = vs.size();
+		int[] revMap = revMap(vs);
+		
+		//Build reverse index. 
+		if(revMap.length != N)
+			throw new RuntimeException("Bad revmap");
+		
+		//Make new graph
+		Graph g = new Graph();
+		g.expandBy(N2);
+		
+		//Loop over looking for edges to insert.
+		//TODO: if the subgraph is very small, just check all N2^2 edges in the subgraph,
+		//instead of looping overall N2*deg options like below.
+		for(int vNew=0; vNew<N2; vNew++) {
+			int vOld = vs.get(vNew);
+			for(int vOld2 : this.eList[vOld]) {
+				if(vOld2 < vOld)
+					continue;//each edge only once
+				int vNew2 = revMap[vOld2];
+				if(vNew2 == -1)
+					continue;//not in the subgraph
+				g.addEdge(vNew, vNew2);
+			}
+		}
+		
+		return g;
+	}
 
 	//Changes the graph to its complement
 	public void complement() {
@@ -218,13 +264,21 @@ public class Graph {
 	}
 	
 	//Check for connected components.
-	public ArrayList<ArrayList<Integer>> connComps(){
+	//If includeZero==true, it will include degree zero vertices (as their own components).
+	//If false, they'll be omitted.
+	public ArrayList<ArrayList<Integer>> connComps(boolean includeZero){
 		ArrayList<ArrayList<Integer>> res = new ArrayList<>();
 		boolean[] visited = new boolean[N];
 		Queue<Integer> toVisit = new ArrayDeque<Integer>();
 		for(int i=0; i<N; i++) {
 			if(visited[i])
 				continue;
+			
+			if(!includeZero && deg[i]==0) {
+				visited[i] = true;
+				continue;
+			}
+			
 			toVisit.add(i);
 			ArrayList<Integer> comp = new ArrayList<>();
 			res.add(comp);

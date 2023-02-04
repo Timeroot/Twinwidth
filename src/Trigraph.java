@@ -9,7 +9,7 @@ public class Trigraph {
 	int[] degBlk, degRed;
 	int maxRed;
 
-	static final boolean CHECK = true;
+	static final boolean CHECK = false;
 	
 	public Trigraph(int N_, Set<Integer>[] newBlk, Set<Integer>[] newRed,
 			int[] degBlk_, int[] degRed_, int maxRed_) {

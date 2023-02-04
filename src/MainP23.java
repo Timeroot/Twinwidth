@@ -43,10 +43,9 @@ public class MainP23 {
 					System.out.println("Reading "+f);
 					BufferedReader reader = new BufferedReader(new FileReader(f));
 					Graph g = parse(reader);
-//					g.dumpMMA();
 					int res = solve(g, fileout);
 					if(VERB) System.out.println("TW = "+res);
-					if(TO_RUN.equals("tiny-test") && res != answers_tiny[ansI]) {
+					if(TO_RUN.equals("tiny-test/") && res != answers_tiny[ansI]) {
 						throw new RuntimeException("Expected "+answers_tiny[ansI]);
 					}
 					ansI++;
@@ -64,8 +63,10 @@ public class MainP23 {
 		long startT;
 		if(VERB) startT = System.currentTimeMillis();
 		
-		int res = SimpleTW.twinWidth(g);
-		int[] sol = SimpleTW.bestSol;
+		//Can replace Preprocessor with BruteTW or SimpleTW, etc.
+		int res = Preproccesor.solve(g);
+		int[] sol = Preproccesor.sol;
+		
 		int N = g.N;
 		
 		for(int i=0; i<N-1; i++) {

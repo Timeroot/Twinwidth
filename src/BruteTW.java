@@ -15,6 +15,7 @@ public class BruteTW {
 		
 		//do initial twin checks
 		int reduce_depth = checkTwinsBigraph(g);
+		println(1, "After detwinning, N="+g.nonZeroDegN()+", E="+g.E());
 		println(1, "Reduced "+reduce_depth+" by twins");
 		int res;
 		
@@ -22,9 +23,10 @@ public class BruteTW {
 			res = 0;
 			bestSol = currSol.clone();
 			println(1, "Twin reduction solved it, the end");
+			if(true) {return 0;}
 			
 		} else {
-			//TODO: connected components
+			
 			int heurUB = HeurGreedy.twinWidth(g);
 			int[] heurSol = HeurGreedy.currSol;
 			int heurDepth = HeurGreedy.depth;
@@ -32,7 +34,6 @@ public class BruteTW {
 			println(3, Arrays.toString(heurSol));
 			
 			nodes=0;
-//			g.dumpMMA();
 			res = twinWidth(Trigraph.fromBigraph(g), 0, heurUB-1, -1, -1);
 			println(1, nodes+" nodes visited");
 			if(res >= heurUB) {
@@ -107,15 +108,21 @@ public class BruteTW {
 			lastJ = -1;
 		}
 		
+		//TODO turn this into generating a whole bunch of options and ranking them. performs better + cleaner
 		int bestScore = ub+1;
-		iLoop: for(int i=0; i<N; i++) {
+		iLoop: for(int i0=0; i0<N; i0++) {
 			//only merge nonempty vertices
-			if(tg.degBlk[i] == 0 && tg.degRed[i] == 0)
+			if(tg.degBlk[i0] == 0 && tg.degRed[i0] == 0)
 				continue;
 			
-			jLoop: for(int j=i+1; j<N; j++) {
-				if(tg.degBlk[j] == 0 && tg.degRed[j] == 0)
+			jLoop: for(int j0=i0+1; j0<N; j0++) {
+				if(tg.degBlk[j0] == 0 && tg.degRed[j0] == 0)
 					continue jLoop;
+
+				int i, j;
+				i = i0;
+				j = j0;
+
 				
 				Trigraph tg_ij = tg.copy();
 				int red_ij_0 = tg_ij.mergeRed(i, j);
@@ -264,6 +271,15 @@ public class BruteTW {
 			if(!progress)
 				break passLoop;
 		}
+		
+		//Normalize to sparsity
+		int eBlk = g.E();
+		int eMax = N*(N-1)/2;
+		if(eBlk > eMax) {
+			//Take the complement
+			g.complement();
+			println(2, "Complementation after initial twinprune");
+		}
 		return reduce_depth;
 	}
 	
@@ -342,6 +358,8 @@ public class BruteTW {
 			steps++;
 			gone[bestSol[2*i+1]] = true;
 		}
+		System.out.println("BLAAAH. From "+Arrays.toString(bestSol));
+		System.out.println("got"+Arrays.toString(gone));
 		for(int i=1; i<N; i++) {
 			if(!gone[i]) {
 				bestSol[2*steps] = 0;
