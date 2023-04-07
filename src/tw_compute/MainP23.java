@@ -85,16 +85,16 @@ public class MainP23 {
 		
 		//Can replace Preprocessor with BruteTW or SimpleTW, etc.
 
-//		int[] sol = new int[2*(g.N-1)];
-//		int res = Preprocessor.solve(g, sol);
+		int[] sol = new int[2*(g.N-1)];
+		int res = Preprocessor.solve(g.copy(), sol);
 		
-		int res = BruteTW.twinWidth(g);
-		int[] sol = BruteTW.bestSol;
+//		int res = BruteTW.twinWidth(g.copy());
+//		int[] sol = BruteTW.bestSol;
 		
 		//validate
 		int verifiedRes = Verifier.validate(g, sol);
 		if(res != verifiedRes)
-			throw new RuntimeException("Bad reported tww");
+			throw new RuntimeException("Bad reported tww: "+res+" vs "+verifiedRes);
 		
 		int N = g.N;
 		

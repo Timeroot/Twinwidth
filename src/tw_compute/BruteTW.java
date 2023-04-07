@@ -2,7 +2,7 @@ package tw_compute;
 import java.util.*;
 
 public class BruteTW {
-	private static final int VERBOSE = !MainP23.VERB?0: 3;
+	private static final int VERBOSE = !MainP23.VERB?0: 1;
 
 	static int[] bestSol;
 	static int[] currSol;
@@ -31,7 +31,7 @@ public class BruteTW {
 			int[] heurSol = HeurGreedy.currSol;
 			int heurDepth = HeurGreedy.depth;
 			println(2, "Heur: TW<="+heurUB);
-			println(3, Arrays.toString(heurSol));
+			println(3, "Heursol="+Arrays.toString(heurSol));
 			
 			nodes=0;
 			res = twinWidth(Trigraph.fromBigraph(g), 0, heurUB-1, -1, -1);
@@ -57,15 +57,15 @@ public class BruteTW {
 				println(3, "Assembled sol: "+Arrays.toString(heurSol));
 			}
 		}
-		
-		println(1, "Scored "+res);
-		println(2, Arrays.toString(bestSol));
 
 		depth -= reduce_depth;
 		if(depth != 0)
 			throw new RuntimeException("Depth tracking failed, "+depth);
-		
+
 		degZeroFixup(N);
+		
+		println(1, "Scored "+res);
+		println(2, "BruteRes: "+Arrays.toString(bestSol));
 		return res;
 	}
 

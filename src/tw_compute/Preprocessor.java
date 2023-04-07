@@ -1,15 +1,16 @@
 package tw_compute;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Preprocessor {
-	private static final int VERBOSE = !MainP23.VERB?0: 2;
+	private static final int VERBOSE = !MainP23.VERB?0: 1;
 	
 	//if true, just return "2" at the end when you would need to search.
 	//obviously produces incorrect results -- just for testing the preprocessor.
 	private static final boolean SKIP_HARD = false;
 	
-	private static final boolean USE_BRIDGE = true;
+	private static final boolean USE_BRIDGE = false;
 	
 	//Solve, by preprocessing + reducing + splitting.
 	static int[] sol;
@@ -82,7 +83,7 @@ public class Preprocessor {
 					articulationSolve(g, 0, g.N, hardSol)
 					:hardSolve(g, 0, g.N, hardSol);
 			
-			System.arraycopy(hardSol, 0, sol, depth, 2*solSize);
+			System.arraycopy(hardSol, 0, sol, 2*depth, 2*solSize);
 			depth += solSize;
 			return tww;
 			
@@ -124,7 +125,7 @@ public class Preprocessor {
 				sol[2*depth+1] = vI0;
 				depth++;
 			}
-			
+
 			return maxTww;
 		}
 	}
@@ -249,11 +250,10 @@ public class Preprocessor {
 				int[] comp_twss = new int[N_comp];
 				
 				if(N_comp != 2)
-					throw new RuntimeException("Right??");
+					throw new RuntimeException("Number of components should be two after removing bridge");
 				
 				for(int i_comp = 0; i_comp < N_comp; i_comp++) {
 					ArrayList<Integer> comp1 = comps.get(i_comp);
-					System.out.println(comp1);
 					
 					if(comp1.size() == 1) {
 						throw new RuntimeException("Split at "+u+", "+v+" and got a size-1 component "+comp1);
