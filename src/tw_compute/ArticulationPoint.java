@@ -1,6 +1,5 @@
+package tw_compute;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Stack;
 
 //based on https://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
 //takes in a bigraph
@@ -39,9 +38,9 @@ public class ArticulationPoint {
 			isAP[u] = true;
 		return time;
 	}
-
-	//prints all articulation points
-	static void AP(Graph g) {
+	
+	//get all articulation points
+	static ArrayList<Integer> AP(Graph g) {
 		int V = g.N;
 		
 		boolean[] visited = new boolean[V];
@@ -57,12 +56,14 @@ public class ArticulationPoint {
 			if (!visited[u])
 				APUtil(g, u, visited, disc, low, 0, par, isAP);
 
-		// Printing the APs
+		ArrayList<Integer> res = new ArrayList<>();
 		for (int u = 0; u < V; u++)
 			if (isAP[u] == true)
-				System.out.println("AP at " + u);
+				res.add(u);
+		
+		return res;
 	}
-	
+
 	//returns the new "time" usually. If an AP was found, returns -(1+v).
 	//instead of finding all APs just finds one.
 	static int APUtil_One(Graph g, int u, boolean visited[], int disc[], int low[], int time, int parent) {
@@ -124,4 +125,48 @@ public class ArticulationPoint {
 		
 		return -1;
 	}
+	
+	//very similar, and based on https://www.geeksforgeeks.org/bridge-in-a-graph/
+    static int bridgeUtil(Graph g, int u, boolean visited[], int disc[], int low[], int parent, int time, ArrayList<Integer> bridges)
+    {
+        visited[u] = true;
+
+        disc[u] = low[u] = ++time;
+
+        for (int v : g.eList[u]) {
+
+            if (!visited[v]) {
+                time = bridgeUtil(g, v, visited, disc, low, u, time, bridges);
+
+                low[u]  = Math.min(low[u], low[v]);
+
+                if (low[v] > disc[u]) {
+                    bridges.add(u);
+                    bridges.add(v);
+                }
+                
+            } else if (v != parent)
+                low[u]  = Math.min(low[u], disc[v]);
+        }
+        return time;
+    }
+
+    static ArrayList<Integer> bridge(Graph g) {
+		int V = g.N;
+		
+        // Mark all the vertices as not visited
+        boolean visited[] = new boolean[V];
+        int disc[] = new int[V];
+        int low[] = new int[V];
+        ArrayList<Integer> bridges = new ArrayList<Integer>();
+        
+        // Call the recursive helper function to find Bridges
+        // in DFS tree rooted with vertex 'i'
+        for (int i = 0; i < V; i++)
+            if (visited[i] == false)
+                bridgeUtil(g, i, visited, disc, low, -1, 0, bridges);
+        
+        return bridges;
+    }
+
 }

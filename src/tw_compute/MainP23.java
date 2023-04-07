@@ -1,3 +1,4 @@
+package tw_compute;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,12 +12,20 @@ public class MainP23 {
 	
 	static final String TO_RUN = 
 //			"tiny-test/"
-			"exact-public/"
-//			"stdin"
+//			"exact-public/"
+			"stdin"
 //			"unit"
 			;
 	
-	static final boolean VERB = true;
+	
+	//If nonnull, and TO_RUN is set to run on a directory, these will mark a "start" and "end" filename
+	//to process. Files are processed in directory in lexiographic order, and these will be substrings of
+	//file names to start and stop processing. For instance, setting "_100" and "150.gr" will process only
+	//files exact_100.gr through exact_150.gr, inclusive.
+	static final String START_AT = null; //null, "100"
+	static final String STOP_AT = "050"; //null, "104"
+	
+	static final boolean VERB = false;
 	static final boolean PRINT_SOL_TESTING = false;
 	
 	public static void main(String[] args) throws IOException {
@@ -38,7 +47,14 @@ public class MainP23 {
 			}
 			File[] fileList = dir.listFiles();
 			Arrays.sort(fileList);
+			boolean in_active_set = (START_AT == null); //if null, we start active
 			for(File f : fileList) {
+				if(START_AT != null && f.getName().contains(START_AT)) {
+					in_active_set = true;
+				}
+				if(!in_active_set)
+					continue;
+				
 				if(f.getName().endsWith(".gr")) {
 					System.out.println("Reading "+f);
 					BufferedReader reader = new BufferedReader(new FileReader(f));
@@ -50,6 +66,10 @@ public class MainP23 {
 					}
 					ansI++;
 					System.out.println();
+				}
+				
+				if(STOP_AT != null && f.getName().contains(STOP_AT)) {
+					break;
 				}
 			}
 		} else if(TO_RUN.equals("unit")) {
@@ -64,8 +84,17 @@ public class MainP23 {
 		if(VERB) startT = System.currentTimeMillis();
 		
 		//Can replace Preprocessor with BruteTW or SimpleTW, etc.
-		int res = Preproccesor.solve(g);
-		int[] sol = Preproccesor.sol;
+
+//		int[] sol = new int[2*(g.N-1)];
+//		int res = Preprocessor.solve(g, sol);
+		
+		int res = BruteTW.twinWidth(g);
+		int[] sol = BruteTW.bestSol;
+		
+		//validate
+		int verifiedRes = Verifier.validate(g, sol);
+		if(res != verifiedRes)
+			throw new RuntimeException("Bad reported tww");
 		
 		int N = g.N;
 		
@@ -89,6 +118,8 @@ public class MainP23 {
 		System.out.println("Passed testCograph");
 		Testing.testStar();
 		System.out.println("Passed testStar");
+		Testing.testBridges();
+		System.out.println("Passed testBridges");
 	}
 	
 	public static Graph parse(BufferedReader reader) throws IOException {

@@ -1,13 +1,14 @@
+package tw_compute;
 import java.util.*;
 
 public class BruteTW {
-	private static final int VERBOSE = !MainP23.VERB?0: 2;
+	private static final int VERBOSE = !MainP23.VERB?0: 3;
 
 	static int[] bestSol;
 	static int[] currSol;
 	static int depth;
 	
-	static int twinWidth(Graph g) {
+	public static int twinWidth(Graph g) {
 		
 		int N = g.N;
 		depth = 0;
@@ -23,7 +24,6 @@ public class BruteTW {
 			res = 0;
 			bestSol = currSol.clone();
 			println(1, "Twin reduction solved it, the end");
-			if(true) {return 0;}
 			
 		} else {
 			
@@ -358,8 +358,6 @@ public class BruteTW {
 			steps++;
 			gone[bestSol[2*i+1]] = true;
 		}
-		System.out.println("BLAAAH. From "+Arrays.toString(bestSol));
-		System.out.println("got"+Arrays.toString(gone));
 		for(int i=1; i<N; i++) {
 			if(!gone[i]) {
 				bestSol[2*steps] = 0;

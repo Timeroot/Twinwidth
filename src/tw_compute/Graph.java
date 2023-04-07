@@ -1,3 +1,4 @@
+package tw_compute;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,8 +7,8 @@ import java.util.Queue;
 
 public class Graph {
 	int N;
-	HashSet<Integer>[] eList;
-	int[] deg;
+	public HashSet<Integer>[] eList;
+	public int[] deg;
 	
 	static final boolean CHECK = false;
 	
@@ -31,8 +32,14 @@ public class Graph {
 	public Graph() {
 		this(0, new HashSet[0], new int[0]);
 	}
+
+	public Graph(int N) {
+		this();
+		expandBy(N);
+	}
 	
-	void checkConsistency() {
+	
+	public void checkConsistency() {
 		if(!CHECK)
 			return;
 		
@@ -51,7 +58,7 @@ public class Graph {
 	
 	//Clear all edges from a vertex v.
 	//Destructive, obviously.
-	void clearVertex(int v) {
+	public void clearVertex(int v) {
 		for(int vo : eList[v]){
 			eList[vo].remove(v);
 			deg[vo]--;
@@ -60,7 +67,7 @@ public class Graph {
 		deg[v] = 0;
 	}
 	
-	void clearEdge(int v1, int v2) {
+	public void clearEdge(int v1, int v2) {
 		if(v1 == v2)
 			throw new RuntimeException("Tried to remove self-loop "+v1);
 		boolean worked = eList[v1].remove(v2) && eList[v2].remove(v1);
@@ -70,7 +77,7 @@ public class Graph {
 		deg[v2]--;
 	}
 	
-	void addEdge(int v1, int v2) {
+	public void addEdge(int v1, int v2) {
 		if(v1 == v2)
 			throw new RuntimeException("Tried to add self-loop "+v1);
 		boolean worked = eList[v1].add(v2) && eList[v2].add(v1);
@@ -90,9 +97,13 @@ public class Graph {
 		return newArr;
 	}
 	
-	Graph copy() {
+	public Graph copy() {
 		HashSet<Integer>[] newEList = cloneList(eList);
 		return new Graph(N, newEList, Arrays.copyOf(deg,N));
+	}
+
+	public int N() {
+		return N;
 	}
 	
 	public int E() {
@@ -104,7 +115,7 @@ public class Graph {
 	}
 	
 	//remove all edges
-	void clear() {
+	public void clear() {
 		for(int i=0; i<N; i++) {
 			eList[i].clear();
 			deg[i] = 0;
@@ -113,7 +124,7 @@ public class Graph {
 	}
 	
 	//How many vertices have degree > 0, the 'effective' N?
-	int nonZeroDegN() {
+	public int nonZeroDegN() {
 		int res = 0;
 		for(int i=0; i<N; i++)
 			if(deg[i] > 0)
@@ -132,7 +143,7 @@ public class Graph {
 		N += vNew;
 	}
 	
-	String dumpS() {
+	public String dumpS() {
 		String res = "";
 		res += "{";
 		boolean firstRow = true;
@@ -161,11 +172,11 @@ public class Graph {
 		return res;
 	}
 
-	void dump() {
+	public void dump() {
 		System.out.println(dumpS());
 	}
 	
-	void dumpMMA() {
+	public void dumpMMA() {
 		System.out.println("Graph[Union[Sort /@ Flatten@");
 		String res = "";
 		res += "{";
@@ -191,9 +202,20 @@ public class Graph {
 			}
 			res += "{"+rowStr+"}\n";
 		}
-		res += "}\n";
-		System.out.println(res);
-		System.out.println("], VertexLabels -> Automatic, GraphLayout -> Automatic]");
+		res += "}";
+		System.out.println(res+"], VertexLabels -> Automatic, GraphLayout -> Automatic]");
+	}
+
+	//produce java code to create graph
+	public void dumpJava() {
+		System.out.println("Graph g0 = new Graph(); g0.expandBy("+N+");");
+		for(int i=0; i<N; i++) {
+			for(int vo : eList[i]) {
+				if(vo < i)
+					continue;
+				System.out.println("\tg0.addEdge("+i+", "+vo+");");
+			}
+		}
 	}
 	
 	//Helper method for using subgraph below.
@@ -261,6 +283,13 @@ public class Graph {
 		for(int i=0; i<N; i++) {
 			deg[i] = N-1 - deg[i];
 		}
+	}
+	
+	//returns a new graph as the complement
+	public Graph bar() {
+		Graph g = this.copy();
+		g.complement();
+		return g;
 	}
 	
 	//Check for connected components.

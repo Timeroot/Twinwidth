@@ -1,0 +1,56 @@
+Among TWW=1, P4 seems(?) to be only obstruction. No induced P4 -> TWW==0.
+P4 is self-dual.
+
+Among TWW=2, C5 is one obstruction, and the only up to N=5. C5 is also self-dual.
+At N=6, there are 6 obstructions besides C5. Here they are, with their G6 encodings ("E***").
+
+* C6, EhEG
+* C6-complement	, EUxo
+* S3, EElw in file, Ey[g in graphclasses.org
+	   0
+	  / \
+	  3--4
+	 / \/ \
+	 1--5--2
+* net, aka S3-bar, ECqg in file, EDbO in graphclasses.org
+	   1
+	   |
+	   4
+	  / \
+	3-0-5-2
+* antenna, EEio, EjCg 
+	 1
+	 |
+	 3
+	/ \
+	5-0
+	| |
+	2-4
+* co-antenna, EEhw, ESzO
+	    0
+	   / \
+	  3  4
+	 / \/ \
+	 1--5--2
+
+those come in 3 non-self-dual pairs.
+
+At N=7, obstructions are:
+ * T2 (FhC_G), co-T2 (FUz^o)
+ * C7 (FhCKG), co-C7 (FUzro)
+ * X2 (FhDOG), co-X2 (FUyno)
+ * X3 (FrGX), co-X3 (FKvew)
+ * X30 (FhOgW), co-X30 (FUnV_) 
+ * X175, X42, X32, X33, RisingSun, X176, X36, X35, X34, X31
+ * their complements
+ * and one that is _not_ in graphclasses.org, code F?qcw, looking like
+ 
+  1-4
+   / \
+3-6--0
+   \ /
+  2-5
+
+ and its complement is FCx}w. It's called XF_2^2 on HoG: XF_2^2
+ 
+ At n=8, n=9, and n=10, the number of obstructions goes 

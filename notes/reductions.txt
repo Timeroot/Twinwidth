@@ -28,3 +28,16 @@ This gives one safe reduction rule:
 We can that this correctly handles B-A-C. The B-A contraction has tww=0, and C-A contraction has tww=0, but doing one and then the other produces tww<=1, and this is because both saturate the tww=0 bound (at step 0). The B-A-C case is also one where doing U and then V (tww<=1) is suboptimal (B-C, A-C, tww=0).
 
 
+/////////////////////////
+
+Ideally we an actually do this at any articulation point. ... mrph
+
+What about just having a degree-one vertex? Those really *feel* reducible.
+
+A vertex x has exactly one neighbor, y. Let's assume that the graph as a whole has tww greater than 2, which will let us do important deductions.
+Let's also assume that we've removed all twins from the graph.
+
+Now take an ideal contraction sequence S for G\x, with tww P, and imagine applying that contraction sequence to
+all of G. At some point we merge y with some other vertex z. When we do, the edge xz becomes red. We can then
+continue with S, and merge xz at the end. This might give us P, or P+1 if the x vertex gets red degree of P in
+S on G\x.

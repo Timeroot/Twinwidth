@@ -1,3 +1,5 @@
+package tw_compute;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Testing {
@@ -20,6 +22,7 @@ public class Testing {
 				continue;
 			g.addEdge(v1, v2);
 		}
+		g.checkConsistency();
 		
 		Trigraph tg = Trigraph.fromBigraph(g);
 		
@@ -34,10 +37,8 @@ public class Testing {
 				v2 = rand.nextInt(20);
 			while(v1 == v2 || tg.degBlk[v2] + tg.degRed[v2] == 0);
 			
-//			System.out.println("Merge "+v1+"&"+v2);
 			tg.mergeRed(v1, v2);
 		}
-		
 		tg.checkConsistency();
 	}
 	
@@ -71,7 +72,7 @@ public class Testing {
 		g.addEdge(8, 2);
 		g.addEdge(8, 9);
 
-		int res = BruteTW.twinWidth(g);
+		int res = SimpleTW.twinWidth(g);
 		System.out.println("Brute TW on cograph: "+res);
 		if(res != 0)
 			throw new RuntimeException("Should be 0");
@@ -106,6 +107,33 @@ public class Testing {
 		for(int i=0; i<7; i++) {
 			if(reds[i] != correct[i])
 				throw new RuntimeException("Star test step "+i);
+		}
+	}
+	
+	//Check that our bridge-fining algorithm is correcting
+	public static void testBridges() {
+		{//Check a 5-pan
+			Graph g = new Graph();
+			g.expandBy(6);
+			
+			g.addEdge(0, 1);
+			g.addEdge(1, 2);
+			g.addEdge(2, 3);
+			g.addEdge(3, 5);
+			g.addEdge(5, 0);
+			g.addEdge(2, 4);
+			
+			ArrayList<Integer> arr = ArticulationPoint.bridge(g);
+			arr.sort(Integer::compare);
+			if(arr.size() != 2 || arr.get(0) != 2 || arr.get(1) != 4)
+				throw new RuntimeException("For bridges got "+arr+" instead of (2,4)");
+		}
+		
+		{
+			Graph g = TestData.getGraph006();
+			g.dumpMMA();
+			System.out.println(ArticulationPoint.bridge(g));
+			System.out.println(ArticulationPoint.AP(g));
 		}
 	}
 }

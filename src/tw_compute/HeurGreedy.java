@@ -1,3 +1,4 @@
+package tw_compute;
 //Computes a heuristic greedy solution
 public class HeurGreedy {
 	private static final int VERBOSE = !MainP23.VERB?0: 0;
